@@ -1,6 +1,8 @@
 import AcmeLogo from "@/app/ui/acme-logo";
 import LoginForm from "@/app/ui/login-form";
 import { Suspense } from "react";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 export default function LoginPage() {
   return (
@@ -12,14 +14,16 @@ export default function LoginPage() {
           </div>
         </div>
         <Suspense>
+          <Link
+            href="/"
+            className="flex items-center gap-5 self-start rounded-lg bg-blue-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
+          >
+            <span className="font-bold">Go Home</span>{" "}
+            <ArrowRightIcon className="w-5 md:w-6" />
+          </Link>
           <LoginForm />
         </Suspense>
       </div>
     </main>
   );
 }
-
-
-
-
-// +GhtyCKfbNrQY8YWEJ7rNwvlEAbrstc2QPspx/0ZPtU=
