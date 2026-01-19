@@ -4,6 +4,8 @@ import { z } from "zod";
 import postgres from "postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { signIn } from "@/auth";
+import { AuthError } from "next-auth";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -112,8 +114,6 @@ export type State = {
 //   redirect("/dashboard/invoices");
 // }
 
-
-
 export async function createInvoice(prevState: State, formData: FormData) {
   // Validate form using Zod
   const validatedFields = CreateInvoice.safeParse({
@@ -152,9 +152,6 @@ export async function createInvoice(prevState: State, formData: FormData) {
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
 }
-
-
-
 
 // Use Zod to update the expected types
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
@@ -204,13 +201,11 @@ const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 //   redirect("/dashboard/invoices");
 // }
 
-
-
 export async function updateInvoice(
   id: string,
   prevState: State | undefined,
   formData: FormData,
-):Promise<State> {
+): Promise<State> {
   const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get("customerId"),
     amount: formData.get("amount"),
@@ -242,8 +237,6 @@ export async function updateInvoice(
   redirect("/dashboard/invoices");
 }
 
-
-
 // export async function deleteInvoice(id: string) {
 //   await sql`DELETE FROM invoices WHERE id = ${id}`;
 //   revalidatePath("/dashboard/invoices");
@@ -255,4 +248,23 @@ export async function deleteInvoice(id: string) {
   // Unreachable code block
   await sql`DELETE FROM invoices WHERE id = ${id}`;
   revalidatePath("/dashboard/invoices");
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn("credentials", formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin":
+          return "Invalid credentials.";
+        default:
+          return "Something went wrong.";
+      }
+    }
+    throw error;
+  }
 }
